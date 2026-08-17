@@ -2,10 +2,12 @@
 
 A simple stock market paper trading platform built to practice backend development with Go.
 
-Users can search stocks, view stock price charts, create a watchlist, and simulate buying and selling stocks using virtual money.
+Users can create an account, search stocks, view stock price charts, create a watchlist, and simulate buying and selling stocks using virtual money.
 
 ## Features
 
+- Register and login
+- JWT authentication
 - Search stocks
 - View stock details
 - View historical stock charts
@@ -21,6 +23,7 @@ Users can search stocks, view stock price charts, create a watchlist, and simula
 
 - Go
 - Gin
+- JWT
 - PostgreSQL
 - pgx
 - sqlc
@@ -48,6 +51,7 @@ Users can search stocks, view stock price charts, create a watchlist, and simula
 │   ├── api/
 │   └── market-worker/
 ├── internal/
+│   ├── auth/
 │   ├── user/
 │   ├── market/
 │   ├── candle/
@@ -85,13 +89,15 @@ go run ./cmd/market-worker
 
 The MVP includes:
 
-1. Stock search
-2. Stock detail and chart
-3. Real-time price updates
-4. Watchlist
-5. Paper buy/sell orders
-6. Portfolio tracking
-7. Order history
+1. User registration and login
+2. JWT authentication
+3. Stock search
+4. Stock detail and chart
+5. Real-time price updates
+6. Watchlist
+7. Paper buy/sell orders
+8. Portfolio tracking
+9. Order history
 
 Real-money trading and brokerage integration are not included.
 
