@@ -41,3 +41,7 @@ func Conflict(c *gin.Context, message string) {
 func InternalServerError(c *gin.Context, message string) {
 	Error(c, http.StatusInternalServerError, message)
 }
+
+func Unauthorized(c *gin.Context, message string) {
+	Error(c, http.StatusUnauthorized, message)
+}

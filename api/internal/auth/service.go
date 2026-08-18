@@ -17,6 +17,11 @@ type AuthService struct {
 	jwtSecret  string
 }
 
+type CustomClaims struct {
+	UserID int64 `json:"userId"`
+	jwt.RegisteredClaims
+}
+
 func NewAuthService(repository *AuthRepository) *AuthService {
 	return &AuthService{
 		repository: repository,
@@ -44,9 +49,14 @@ func (s *AuthService) CreateUser(ctx context.Context, req CreateUserRequest) (qu
 }
 
 func GenerateAccessToken(user queries.User, secret []byte) (string, error) {
-	clams := jwt.MapClaims{
-		"userId": user.ID,
-		"exp":    time.Now().Add(time.Hour * 1).Unix(),
+	clams := &CustomClaims{
+		UserID: user.ID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			Issuer:    "stock-paper-trading",
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, clams)
