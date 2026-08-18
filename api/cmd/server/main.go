@@ -3,9 +3,10 @@ package main
 import (
 	"log"
 
+	auth "github.com/pannaraiSIH/stock-paper-trading/internal/auth"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/config"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/db"
-	"github.com/pannaraiSIH/stock-paper-trading/internal/handler"
+	"github.com/pannaraiSIH/stock-paper-trading/internal/health"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/router"
 )
 
@@ -18,9 +19,13 @@ func main() {
 	}
 	defer store.Close()
 
-	healthHandler := handler.NewHealthHandler(store)
+	healthHandler := health.NewHealthHandler(store)
 
-	r := router.SetupRouter(healthHandler)
+	authRepository := auth.NewAuthRepository(store)
+	authService := auth.NewAuthService(authRepository)
+	authHandler := auth.NewAuthHandler(authService)
+
+	r := router.SetupRouter(healthHandler, authHandler)
 
 	r.Run()
 }

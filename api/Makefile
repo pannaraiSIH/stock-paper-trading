@@ -1,7 +1,11 @@
 include .env
 export
 
-.PHONY: generate migrate run test
+.PHONY: format generate migrate run test
+
+format:
+	@echo "Formatting code..."
+	go fmt ./...
 
 generate:
 	@echo "Generating sql code..."
