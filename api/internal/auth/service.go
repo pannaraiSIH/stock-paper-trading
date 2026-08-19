@@ -12,8 +12,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService struct {
-	repository *AuthRepository
+type AuthService interface {
+	CreateUser(ctx context.Context, req CreateUserRequest) (queries.User, error)
+	Login(ctx context.Context, req LoginUserRequest) (string, error)
+}
+
+type authService struct {
+	repository AuthRepository
 	jwtSecret  string
 }
 
@@ -22,13 +27,13 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthService(repository *AuthRepository) *AuthService {
-	return &AuthService{
+func NewAuthService(repository AuthRepository) AuthService {
+	return &authService{
 		repository: repository,
 	}
 }
 
-func (s *AuthService) CreateUser(ctx context.Context, req CreateUserRequest) (queries.User, error) {
+func (s *authService) CreateUser(ctx context.Context, req CreateUserRequest) (queries.User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return queries.User{}, err
@@ -64,7 +69,7 @@ func GenerateAccessToken(user queries.User, secret []byte) (string, error) {
 	return token.SignedString(secret)
 }
 
-func (s *AuthService) Login(ctx context.Context, req LoginUserRequest) (string, error) {
+func (s *authService) Login(ctx context.Context, req LoginUserRequest) (string, error) {
 	user, err := s.repository.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

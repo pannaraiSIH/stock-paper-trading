@@ -9,10 +9,10 @@ import (
 )
 
 type AuthHandler struct {
-	service *AuthService
+	service AuthService
 }
 
-func NewAuthHandler(service *AuthService) *AuthHandler {
+func NewAuthHandler(service AuthService) *AuthHandler {
 	return &AuthHandler{
 		service: service,
 	}
@@ -57,7 +57,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidCredentials):
-			response.BadRequest(c, err.Error())
+			response.Unauthorized(c, err.Error())
 		default:
 			response.InternalServerError(c, "failed to login")
 		}

@@ -7,20 +7,25 @@ import (
 	"github.com/pannaraiSIH/stock-paper-trading/internal/db/queries"
 )
 
-type AuthRepository struct {
+type AuthRepository interface {
+	CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error)
+	GetUserByEmail(ctx context.Context, email string) (queries.User, error)
+}
+
+type authRepository struct {
 	store *db.Store
 }
 
-func NewAuthRepository(store *db.Store) *AuthRepository {
-	return &AuthRepository{
+func NewAuthRepository(store *db.Store) AuthRepository {
+	return &authRepository{
 		store: store,
 	}
 }
 
-func (r *AuthRepository) CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error) {
+func (r *authRepository) CreateUser(ctx context.Context, params queries.CreateUserParams) (queries.User, error) {
 	return r.store.CreateUser(ctx, params)
 }
 
-func (r *AuthRepository) GetUserByEmail(ctx context.Context, email string) (queries.User, error) {
+func (r *authRepository) GetUserByEmail(ctx context.Context, email string) (queries.User, error) {
 	return r.store.GetUserByEmail(ctx, email)
 }
