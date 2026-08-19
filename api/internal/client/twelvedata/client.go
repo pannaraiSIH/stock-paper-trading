@@ -78,3 +78,28 @@ func (tw *TwelveDataClient) GetCandles(
 
 	return candles, nil
 }
+
+func (tw *TwelveDataClient) GetStockDetails(ctx context.Context, symbol string) (market.GetStockDetailsResponse, error) {
+	resp, _, err := tw.client.FundamentalsAPI.GetProfile(ctx).Symbol(symbol).Execute()
+	if err != nil {
+		return market.GetStockDetailsResponse{}, err
+	}
+
+	return market.GetStockDetailsResponse{
+		Symbol:      resp.Symbol,
+		Name:        resp.Name,
+		Exchange:    resp.Exchange,
+		MicCode:     resp.MicCode,
+		Sector:      resp.Sector,
+		Industry:    resp.Industry,
+		Website:     resp.Website,
+		Description: resp.Description,
+		Type:        resp.Type,
+		CEO:         resp.CEO,
+		Address:     resp.Address,
+		City:        resp.City,
+		State:       resp.State,
+		Country:     resp.Country,
+		Phone:       resp.Phone,
+	}, nil
+}

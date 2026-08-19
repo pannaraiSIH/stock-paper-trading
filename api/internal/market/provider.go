@@ -24,4 +24,8 @@ type MarketDataProvider interface {
 		interval Interval,
 		outputSize int64,
 	) ([]GetCandleResponse, error)
+	GetStockDetails(
+		ctx context.Context,
+		symbol string,
+	) (GetStockDetailsResponse, error)
 }

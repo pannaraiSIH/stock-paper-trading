@@ -35,6 +35,18 @@ func (h *MarketHandler) SearchStocks(c *gin.Context) {
 	response.Success(c, http.StatusOK, stocks)
 }
 
+func (h *MarketHandler) GetStockDetails(c *gin.Context) {
+	symbol := c.Param("symbol")
+
+	detail, err := h.service.GetStockDetails(c, symbol)
+	if err != nil {
+		response.InternalServerError(c, "failed to get stock details")
+		return
+	}
+
+	response.Success(c, http.StatusOK, detail)
+}
+
 func (h *MarketHandler) GetCandles(c *gin.Context) {
 	symbol := c.Param("symbol")
 

@@ -22,9 +22,11 @@ func SetupRouter(
 	api.POST("/auth/register", authHandler.CreateUser)
 	api.POST("/auth/login", authHandler.Login)
 
-	protected := api.Use(auth.AuthMiddleware(jwtSecret))
+	protected := api.Group("")
+	protected.Use(auth.AuthMiddleware(jwtSecret))
 
 	protected.GET("/market/stocks", marketHandler.SearchStocks)
+	protected.GET("/market/stocks/:symbol", marketHandler.GetStockDetails)
 	protected.GET("/market/stocks/:symbol/candles", marketHandler.GetCandles)
 
 	return r

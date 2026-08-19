@@ -21,6 +21,13 @@ func (s *MarketService) SearchStocks(
 	return s.provider.SearchStocks(ctx, query.Query, query.OutputSize)
 }
 
+func (s *MarketService) GetStockDetails(
+	ctx context.Context,
+	symbol string,
+) (GetStockDetailsResponse, error) {
+	return s.provider.GetStockDetails(ctx, symbol)
+}
+
 func (s *MarketService) GetCandles(
 	ctx context.Context,
 	symbol string,

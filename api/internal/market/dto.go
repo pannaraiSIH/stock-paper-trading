@@ -25,3 +25,21 @@ type GetCandleResponse struct {
 	Close    string `json:"close"`
 	Volume   string `json:"volume"`
 }
+
+type GetStockDetailsResponse struct {
+	Symbol      string  `json:"symbol"`
+	Name        string  `json:"name"`
+	Exchange    string  `json:"exchange"`
+	MicCode     string  `json:"micCode"`
+	Sector      *string `json:"sector"`
+	Industry    *string `json:"industry"`
+	Website     *string `json:"website"`
+	Description *string `json:"description"`
+	Type        *string `json:"type"`
+	CEO         *string `json:"ceo"`
+	Address     *string `json:"address"`
+	City        *string `json:"city"`
+	State       *string `json:"state"`
+	Country     *string `json:"country"`
+	Phone       *string `json:"phone"`
+}
