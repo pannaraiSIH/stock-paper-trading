@@ -4,9 +4,11 @@ import (
 	"log"
 
 	auth "github.com/pannaraiSIH/stock-paper-trading/internal/auth"
+	"github.com/pannaraiSIH/stock-paper-trading/internal/client/twelvedata"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/config"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/db"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/health"
+	"github.com/pannaraiSIH/stock-paper-trading/internal/market"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/router"
 )
 
@@ -15,9 +17,14 @@ func main() {
 
 	store, err := db.NewStore(cfg.DatabaseURL)
 	if err != nil {
-		log.Fatal("Failed to connection Postgres", err)
+		log.Fatalf("failed to connection Postgres: %v", err)
 	}
 	defer store.Close()
+
+	twelveDataClient, err := twelvedata.NewTwelveDataClient(cfg.TwelveDataApiKey)
+	if err != nil {
+		log.Fatalf("failed to create Twelve Data client: %v", err)
+	}
 
 	healthHandler := health.NewHealthHandler(store)
 
@@ -25,7 +32,15 @@ func main() {
 	authService := auth.NewAuthService(authRepository)
 	authHandler := auth.NewAuthHandler(authService)
 
-	r := router.SetupRouter(healthHandler, authHandler)
+	marketService := market.NewMarketService(twelveDataClient)
+	markHandler := market.NewMarketHandler(marketService)
+
+	r := router.SetupRouter(
+		healthHandler,
+		authHandler,
+		markHandler,
+		cfg.JWTSecret,
+	)
 
 	r.Run()
 }

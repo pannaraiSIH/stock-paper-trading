@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	JWTSecret   string
-	Port        string
+	DatabaseURL      string
+	JWTSecret        string
+	Port             string
+	TwelveDataApiKey string
 }
 
 func Load() Config {
@@ -19,8 +20,9 @@ func Load() Config {
 	}
 
 	return Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		JWTSecret:   os.Getenv("JWT_SECRET"),
-		Port:        os.Getenv("PORT"),
+		DatabaseURL:      os.Getenv("DATABASE_URL"),
+		JWTSecret:        os.Getenv("JWT_SECRET"),
+		Port:             os.Getenv("PORT"),
+		TwelveDataApiKey: os.Getenv("TWELVEDATA_API_KEY"),
 	}
 }

@@ -8,6 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.11.1
+	github.com/twelvedata/twelvedata-go v1.0.14
 	golang.org/x/crypto v0.55.0
 )
 
