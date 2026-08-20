@@ -18,7 +18,8 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
-		parts := strings.SplitN(authHeader, "", 2)
+		parts := strings.SplitN(authHeader, " ", 2)
+
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
 			response.Unauthorized(ctx, "unauthorized")
 			ctx.Abort()
@@ -26,10 +27,10 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		}
 
 		token, err := jwt.ParseWithClaims(parts[1], &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			if t.Method != jwt.SigningMethodHS256 {
 				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 			}
-			return jwtSecret, nil
+			return []byte(jwtSecret), nil
 		})
 		if err != nil || !token.Valid {
 			response.Unauthorized(ctx, "unauthorized")

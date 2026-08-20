@@ -1,7 +1,7 @@
 package market
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,10 +9,10 @@ import (
 )
 
 type MarketHandler struct {
-	service *MarketService
+	service MarketService
 }
 
-func NewMarketHandler(service *MarketService) *MarketHandler {
+func NewMarketHandler(service MarketService) *MarketHandler {
 	return &MarketHandler{
 		service: service,
 	}
@@ -28,23 +28,11 @@ func (h *MarketHandler) SearchStocks(c *gin.Context) {
 
 	stocks, err := h.service.SearchStocks(c, query)
 	if err != nil {
-		response.InternalServerError(c, "failed to search stocks")
+		handleMarketError(c, err, "failed to search stocks")
 		return
 	}
 
 	response.Success(c, http.StatusOK, stocks)
-}
-
-func (h *MarketHandler) GetStockDetails(c *gin.Context) {
-	symbol := c.Param("symbol")
-
-	detail, err := h.service.GetStockDetails(c, symbol)
-	if err != nil {
-		response.InternalServerError(c, "failed to get stock details")
-		return
-	}
-
-	response.Success(c, http.StatusOK, detail)
 }
 
 func (h *MarketHandler) GetCandles(c *gin.Context) {
@@ -53,16 +41,38 @@ func (h *MarketHandler) GetCandles(c *gin.Context) {
 	var query GetCandlesQuery
 
 	if err := c.ShouldBindQuery(&query); err != nil {
-		fmt.Println(err)
 		response.BadRequest(c, ErrInvalidQueryParameters.Error())
 		return
 	}
 
 	candles, err := h.service.GetCandles(c, symbol, query)
 	if err != nil {
-		response.InternalServerError(c, "failed to get candles")
+		handleMarketError(c, err, "failed to get candles")
 		return
 	}
 
 	response.Success(c, http.StatusOK, candles)
+}
+
+func (h *MarketHandler) GetStockDetails(c *gin.Context) {
+	symbol := c.Param("symbol")
+
+	detail, err := h.service.GetStockDetails(c, symbol)
+	if err != nil {
+		handleMarketError(c, err, "failed to get stock details")
+		return
+	}
+
+	response.Success(c, http.StatusOK, detail)
+}
+
+func handleMarketError(c *gin.Context, err error, fallbackMessage string) {
+	switch {
+	case errors.Is(err, ErrStockNotFound):
+		response.NotFound(c, ErrStockNotFound.Error())
+	case errors.Is(err, ErrMarketProviderUnavailable):
+		response.ServiceUnavailable(c, ErrMarketProviderUnavailable.Error())
+	default:
+		response.InternalServerError(c, fallbackMessage)
+	}
 }

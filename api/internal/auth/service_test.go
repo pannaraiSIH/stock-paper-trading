@@ -79,7 +79,7 @@ func TestCreateUserService(t *testing.T) {
 					return tt.user, tt.repoErr
 				},
 			}
-			service := NewAuthService(mockRepository)
+			service := NewAuthService(mockRepository, "jwt-secret")
 
 			user, err := service.CreateUser(ctx, req)
 
@@ -163,7 +163,7 @@ func TestLoginUser(t *testing.T) {
 					return tt.user, tt.repoErr
 				},
 			}
-			service := NewAuthService(mockRepository)
+			service := NewAuthService(mockRepository, "jwt-secret")
 
 			accessToken, err := service.Login(t.Context(), req)
 

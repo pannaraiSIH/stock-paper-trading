@@ -5,7 +5,7 @@ type SearchStocksQuery struct {
 	OutputSize int64  `form:"outputSize" binding:"required"`
 }
 
-type StockSearchResponse struct {
+type SearchStocksResponse struct {
 	Symbol   string `json:"symbol"`
 	Name     string `json:"name"`
 	Exchange string `json:"exchange"`
@@ -13,7 +13,7 @@ type StockSearchResponse struct {
 }
 
 type GetCandlesQuery struct {
-	Interval   Interval `form:"interval" binding:"required"`
+	Interval   Interval `form:"interval" binding:"required,oneof=1min 5min 1h 1day"`
 	OutputSize int64    `form:"outputSize" binding:"required"`
 }
 

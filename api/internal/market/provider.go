@@ -16,14 +16,15 @@ const (
 type MarketDataProvider interface {
 	SearchStocks(
 		ctx context.Context,
-		query string,
-		outputSize int64,
-	) ([]StockSearchResponse, error)
-	GetCandles(ctx context.Context,
+		query SearchStocksQuery,
+	) ([]SearchStocksResponse, error)
+
+	GetCandles(
+		ctx context.Context,
 		symbol string,
-		interval Interval,
-		outputSize int64,
+		query GetCandlesQuery,
 	) ([]GetCandleResponse, error)
+
 	GetStockDetails(
 		ctx context.Context,
 		symbol string,

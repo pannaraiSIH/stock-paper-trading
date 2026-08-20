@@ -8,7 +8,7 @@ import (
 
 type APIResponse[T any] struct {
 	Success bool `json:"success"`
-	Data    T    `json:"data,omitempty"`
+	Data    T    `json:"data"`
 }
 
 type ErrorResponse struct {
@@ -44,4 +44,12 @@ func InternalServerError(c *gin.Context, message string) {
 
 func Unauthorized(c *gin.Context, message string) {
 	Error(c, http.StatusUnauthorized, message)
+}
+
+func NotFound(c *gin.Context, message string) {
+	Error(c, http.StatusNotFound, message)
+}
+
+func ServiceUnavailable(c *gin.Context, message string) {
+	Error(c, http.StatusServiceUnavailable, message)
 }

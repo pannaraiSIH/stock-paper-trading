@@ -29,7 +29,7 @@ func main() {
 	healthHandler := health.NewHealthHandler(store)
 
 	authRepository := auth.NewAuthRepository(store)
-	authService := auth.NewAuthService(authRepository)
+	authService := auth.NewAuthService(authRepository, cfg.JWTSecret)
 	authHandler := auth.NewAuthHandler(authService)
 
 	marketService := market.NewMarketService(twelveDataClient)

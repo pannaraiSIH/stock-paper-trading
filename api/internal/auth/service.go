@@ -27,9 +27,10 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAuthService(repository AuthRepository) AuthService {
+func NewAuthService(repository AuthRepository, jwtSecret string) AuthService {
 	return &authService{
 		repository: repository,
+		jwtSecret:  jwtSecret,
 	}
 }
 

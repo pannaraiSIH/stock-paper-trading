@@ -2,6 +2,8 @@ package twelvedata
 
 import (
 	"context"
+	"errors"
+	"net/http"
 
 	"github.com/pannaraiSIH/stock-paper-trading/internal/market"
 	"github.com/twelvedata/twelvedata-go/twelvedata"
@@ -22,21 +24,21 @@ func NewTwelveDataClient(apiKey string) (*TwelveDataClient, error) {
 	}, nil
 }
 
-func (tw *TwelveDataClient) SearchStocks(ctx context.Context, query string, outputSize int64) ([]market.StockSearchResponse, error) {
+func (tw *TwelveDataClient) SearchStocks(ctx context.Context, query market.SearchStocksQuery) ([]market.SearchStocksResponse, error) {
 	resp, _, err := tw.client.ReferenceDataAPI.
 		GetSymbolSearch(ctx).
-		Symbol(query).
-		Outputsize(outputSize).
+		Symbol(query.Query).
+		Outputsize(query.OutputSize).
 		ShowPlan(true).
 		Execute()
 	if err != nil {
-		return nil, err
+		return nil, handleTwelveDataError(err)
 	}
 
-	var stocks []market.StockSearchResponse
+	var stocks []market.SearchStocksResponse
 
 	for _, r := range resp.Data {
-		stocks = append(stocks, market.StockSearchResponse{
+		stocks = append(stocks, market.SearchStocksResponse{
 			Symbol:   r.Symbol,
 			Name:     r.InstrumentName,
 			Exchange: r.Exchange,
@@ -50,17 +52,17 @@ func (tw *TwelveDataClient) SearchStocks(ctx context.Context, query string, outp
 func (tw *TwelveDataClient) GetCandles(
 	ctx context.Context,
 	symbol string,
-	interval market.Interval,
-	outputSize int64) ([]market.GetCandleResponse, error) {
+	query market.GetCandlesQuery,
+) ([]market.GetCandleResponse, error) {
 
 	resp, _, err := tw.client.MarketDataAPI.
 		GetTimeSeries(ctx).
 		Symbol(symbol).
-		Interval(twelvedata.IntervalEnum(interval)).
-		Outputsize(outputSize).
+		Interval(twelvedata.IntervalEnum(query.Interval)).
+		Outputsize(query.OutputSize).
 		Execute()
 	if err != nil {
-		return nil, err
+		return nil, handleTwelveDataError(err)
 	}
 
 	var candles []market.GetCandleResponse
@@ -82,7 +84,7 @@ func (tw *TwelveDataClient) GetCandles(
 func (tw *TwelveDataClient) GetStockDetails(ctx context.Context, symbol string) (market.GetStockDetailsResponse, error) {
 	resp, _, err := tw.client.FundamentalsAPI.GetProfile(ctx).Symbol(symbol).Execute()
 	if err != nil {
-		return market.GetStockDetailsResponse{}, err
+		return market.GetStockDetailsResponse{}, handleTwelveDataError(err)
 	}
 
 	return market.GetStockDetailsResponse{
@@ -102,4 +104,21 @@ func (tw *TwelveDataClient) GetStockDetails(ctx context.Context, symbol string) 
 		Country:     resp.Country,
 		Phone:       resp.Phone,
 	}, nil
+}
+
+func handleTwelveDataError(err error) error {
+	var apiErr twelvedata.TwelvedataApiError
+
+	if errors.As(err, &apiErr) {
+		statusCode := apiErr.GetStatusCode()
+
+		switch {
+		case statusCode == http.StatusNotFound:
+			return market.ErrStockNotFound
+		case statusCode == http.StatusForbidden:
+			return market.ErrMarketProviderUnavailable
+		}
+	}
+
+	return err
 }
