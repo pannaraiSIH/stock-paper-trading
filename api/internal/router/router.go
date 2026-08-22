@@ -11,6 +11,7 @@ func SetupRouter(
 	healthHandler *health.HealthHandler,
 	authHandler *auth.AuthHandler,
 	marketHandler *market.MarketHandler,
+	hub market.HubManager,
 	jwtSecret string,
 ) *gin.Engine {
 	r := gin.Default()
@@ -28,6 +29,7 @@ func SetupRouter(
 	protected.GET("/market/stocks", marketHandler.SearchStocks)
 	protected.GET("/market/stocks/:symbol", marketHandler.GetStockDetails)
 	protected.GET("/market/stocks/:symbol/candles", marketHandler.GetCandles)
+	protected.GET("/market/ws", hub.Connect)
 
 	return r
 }
