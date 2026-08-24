@@ -48,17 +48,20 @@ Users can create an account, search stocks, view stock price charts, create a wa
 ```text
 .
 ├── cmd/
-│   ├── api/
+│   ├── server/
 │   └── market-worker/
 ├── internal/
 │   ├── auth/
-│   ├── user/
+│   ├── client/
+│   │   └── twelvedata/
+│   ├── config/
+│   ├── db/
+│   ├── dto/
+│   ├── health/
 │   ├── market/
-│   ├── candle/
-│   ├── watchlist/
-│   ├── order/
-│   ├── portfolio/
-│   └── websocket/
+│   ├── redis/
+│   ├── response/
+│   └── router/
 ├── migrations/
 ├── sql/
 ├── docker-compose.yml
