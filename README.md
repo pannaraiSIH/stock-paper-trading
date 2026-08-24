@@ -76,7 +76,7 @@ docker compose up -d
 ### 2. Run the API
 
 ```bash
-go run ./cmd/api
+go run ./cmd/server
 ```
 
 ### 3. Run the market worker
