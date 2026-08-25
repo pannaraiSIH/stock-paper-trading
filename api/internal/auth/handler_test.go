@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -45,9 +46,15 @@ func makeRequest(
 	r *gin.Engine,
 	method string,
 	path string,
-	body string,
+	body ...string,
 ) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(method, path, strings.NewReader(body))
+	var reader io.Reader
+
+	if len(body) > 0 {
+		reader = strings.NewReader(body[0])
+	}
+
+	req := httptest.NewRequest(method, path, reader)
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()

@@ -15,18 +15,19 @@ type marketWorker struct {
 func NewMarketWorker(
 	provider RealtimeProvider,
 	hubManager HubManager,
-	priceCache MarketCache,
+	marketCache MarketCache,
 ) *marketWorker {
 	return &marketWorker{
 		provider:    provider,
 		hubManager:  hubManager,
-		marketCache: priceCache,
+		marketCache: marketCache,
 	}
 }
 
 func (w *marketWorker) Run(ctx context.Context) {
 	if err := w.provider.Connect(ctx); err != nil {
 		log.Printf("failed to connect market provider: %v", err)
+		return
 	}
 
 	go func() {
