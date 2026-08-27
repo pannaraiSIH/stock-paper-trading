@@ -5,6 +5,7 @@ import (
 	"github.com/pannaraiSIH/stock-paper-trading/internal/auth"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/health"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/market"
+	"github.com/pannaraiSIH/stock-paper-trading/internal/watchlist"
 )
 
 func SetupRouter(
@@ -12,6 +13,7 @@ func SetupRouter(
 	authHandler *auth.AuthHandler,
 	marketHandler *market.MarketHandler,
 	hub market.HubManager,
+	watchlistHandler watchlist.WatchlistHandler,
 	jwtSecret string,
 ) *gin.Engine {
 	r := gin.Default()
@@ -30,6 +32,13 @@ func SetupRouter(
 	protected.GET("/market/stocks/:symbol", marketHandler.GetStockDetails)
 	protected.GET("/market/stocks/:symbol/candles", marketHandler.GetCandles)
 	protected.GET("/market/ws", hub.Connect)
+
+	protected.GET("/watchlist", watchlistHandler.GetWatchlist)
+	protected.POST("/watchlist", watchlistHandler.CreateWatchlist)
+
+	protected.GET("/watchlist/items", watchlistHandler.GetWatchlistItems)
+	protected.POST("/watchlist/items", watchlistHandler.AddWatchlistItem)
+	protected.DELETE("/watchlist/items/:itemID", watchlistHandler.DeleteWatchlistItem)
 
 	return r
 }

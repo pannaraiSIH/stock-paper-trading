@@ -17,6 +17,7 @@ import (
 	"github.com/pannaraiSIH/stock-paper-trading/internal/market"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/redis"
 	"github.com/pannaraiSIH/stock-paper-trading/internal/router"
+	"github.com/pannaraiSIH/stock-paper-trading/internal/watchlist"
 )
 
 func main() {
@@ -64,11 +65,16 @@ func main() {
 	marketService := market.NewMarketService(marketDataClient)
 	markHandler := market.NewMarketHandler(marketService)
 
+	watchlistRepository := watchlist.NewWatchlistRepository(store)
+	watchlistService := watchlist.NewWatchlistService(watchlistRepository)
+	watchlistHandler := watchlist.NewWatchlistHandler(watchlistService, marketCache)
+
 	r := router.SetupRouter(
 		healthHandler,
 		authHandler,
 		markHandler,
 		hub,
+		*watchlistHandler,
 		cfg.JWTSecret,
 	)
 
