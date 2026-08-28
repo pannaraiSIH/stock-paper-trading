@@ -6,7 +6,40 @@ package queries
 
 import (
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type Account struct {
+	ID          int64          `json:"id"`
+	UserID      int64          `json:"user_id"`
+	CashBalance pgtype.Numeric `json:"cash_balance"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+}
+
+type Order struct {
+	ID             int64          `json:"id"`
+	AccountID      int64          `json:"account_id"`
+	Symbol         string         `json:"symbol"`
+	Side           string         `json:"side"`
+	Quantity       int32          `json:"quantity"`
+	ExecutionPrice pgtype.Numeric `json:"execution_price"`
+	TotalValue     pgtype.Numeric `json:"total_value"`
+	Status         string         `json:"status"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+}
+
+type Position struct {
+	ID           int64          `json:"id"`
+	AccountID    int64          `json:"account_id"`
+	Symbol       string         `json:"symbol"`
+	Quantity     int32          `json:"quantity"`
+	AveragePrice pgtype.Numeric `json:"average_price"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+}
 
 type User struct {
 	ID           int64     `json:"id"`
