@@ -2,7 +2,6 @@ package watchlist
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -42,7 +41,6 @@ func (h *WatchlistHandler) getUserID(ctx *gin.Context) (int64, bool) {
 
 func (h *WatchlistHandler) CreateWatchlist(ctx *gin.Context) {
 	userID, ok := h.getUserID(ctx)
-	fmt.Println(ok)
 	if !ok {
 		return
 	}

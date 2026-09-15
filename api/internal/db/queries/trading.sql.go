@@ -120,6 +120,27 @@ func (q *Queries) CreatePosition(ctx context.Context, arg CreatePositionParams) 
 	return i, err
 }
 
+const deletePosition = `-- name: DeletePosition :one
+DELETE FROM positions
+WHERE id = $1
+RETURNING id, account_id, symbol, quantity, average_price, created_at, updated_at
+`
+
+func (q *Queries) DeletePosition(ctx context.Context, id int64) (Position, error) {
+	row := q.db.QueryRow(ctx, deletePosition, id)
+	var i Position
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.Symbol,
+		&i.Quantity,
+		&i.AveragePrice,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getAccountByUserID = `-- name: GetAccountByUserID :one
 SELECT id, user_id, cash_balance, created_at, updated_at
 FROM accounts 
@@ -129,6 +150,27 @@ LIMIT 1
 
 func (q *Queries) GetAccountByUserID(ctx context.Context, userID int64) (Account, error) {
 	row := q.db.QueryRow(ctx, getAccountByUserID, userID)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CashBalance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAccountByUserIDForUpdate = `-- name: GetAccountByUserIDForUpdate :one
+SELECT id, user_id, cash_balance, created_at, updated_at
+FROM accounts 
+WHERE user_id = $1
+LIMIT 1
+FOR UPDATE
+`
+
+func (q *Queries) GetAccountByUserIDForUpdate(ctx context.Context, userID int64) (Account, error) {
+	row := q.db.QueryRow(ctx, getAccountByUserIDForUpdate, userID)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -163,6 +205,68 @@ func (q *Queries) GetOrderByID(ctx context.Context, id int64) (Order, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getOrders = `-- name: GetOrders :many
+SELECT id, account_id, symbol, side, quantity, execution_price, total_value, status, created_at, updated_at
+FROM orders
+WHERE account_id = $1
+  AND (
+    COALESCE($2::text, '') = ''
+    OR status = $2::text
+  )
+  AND (
+    COALESCE($3::text, '') = ''
+    OR side = $3::text
+  )
+ORDER BY created_at DESC
+LIMIT $5::int
+OFFSET $4::int
+`
+
+type GetOrdersParams struct {
+	AccountID    int64  `json:"account_id"`
+	StatusFilter string `json:"status_filter"`
+	SideFilter   string `json:"side_filter"`
+	OffsetCount  int32  `json:"offset_count"`
+	LimitCount   int32  `json:"limit_count"`
+}
+
+func (q *Queries) GetOrders(ctx context.Context, arg GetOrdersParams) ([]Order, error) {
+	rows, err := q.db.Query(ctx, getOrders,
+		arg.AccountID,
+		arg.StatusFilter,
+		arg.SideFilter,
+		arg.OffsetCount,
+		arg.LimitCount,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Order{}
+	for rows.Next() {
+		var i Order
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.Symbol,
+			&i.Side,
+			&i.Quantity,
+			&i.ExecutionPrice,
+			&i.TotalValue,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getOrdersByAccountID = `-- name: GetOrdersByAccountID :many
@@ -203,22 +307,23 @@ func (q *Queries) GetOrdersByAccountID(ctx context.Context, accountID int64) ([]
 	return items, nil
 }
 
-const getPositionByAccountAndSymbol = `-- name: GetPositionByAccountAndSymbol :one
+const getPositionByAccountAndSymbolForUpdate = `-- name: GetPositionByAccountAndSymbolForUpdate :one
 SELECT id, account_id, symbol, quantity, average_price, created_at, updated_at
 FROM positions
 WHERE
     account_id = $1
     AND symbol = $2
 LIMIT 1
+FOR UPDATE
 `
 
-type GetPositionByAccountAndSymbolParams struct {
+type GetPositionByAccountAndSymbolForUpdateParams struct {
 	AccountID int64  `json:"account_id"`
 	Symbol    string `json:"symbol"`
 }
 
-func (q *Queries) GetPositionByAccountAndSymbol(ctx context.Context, arg GetPositionByAccountAndSymbolParams) (Position, error) {
-	row := q.db.QueryRow(ctx, getPositionByAccountAndSymbol, arg.AccountID, arg.Symbol)
+func (q *Queries) GetPositionByAccountAndSymbolForUpdate(ctx context.Context, arg GetPositionByAccountAndSymbolForUpdateParams) (Position, error) {
+	row := q.db.QueryRow(ctx, getPositionByAccountAndSymbolForUpdate, arg.AccountID, arg.Symbol)
 	var i Position
 	err := row.Scan(
 		&i.ID,
@@ -230,6 +335,59 @@ func (q *Queries) GetPositionByAccountAndSymbol(ctx context.Context, arg GetPosi
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getPositions = `-- name: GetPositions :many
+SELECT id, account_id, symbol, quantity, average_price, created_at, updated_at
+FROM positions
+WHERE account_id = $1
+  AND (
+    COALESCE($2::text, '') = ''
+    OR symbol = $2::text
+  )
+ORDER BY created_at DESC
+LIMIT $4::int
+OFFSET $3::int
+`
+
+type GetPositionsParams struct {
+	AccountID    int64  `json:"account_id"`
+	SymbolFilter string `json:"symbol_filter"`
+	OffsetCount  int32  `json:"offset_count"`
+	LimitCount   int32  `json:"limit_count"`
+}
+
+func (q *Queries) GetPositions(ctx context.Context, arg GetPositionsParams) ([]Position, error) {
+	rows, err := q.db.Query(ctx, getPositions,
+		arg.AccountID,
+		arg.SymbolFilter,
+		arg.OffsetCount,
+		arg.LimitCount,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Position{}
+	for rows.Next() {
+		var i Position
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.Symbol,
+			&i.Quantity,
+			&i.AveragePrice,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getPositionsByAccountID = `-- name: GetPositionsByAccountID :many
@@ -265,6 +423,32 @@ func (q *Queries) GetPositionsByAccountID(ctx context.Context, accountID int64) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateAccountBalance = `-- name: UpdateAccountBalance :one
+UPDATE accounts 
+SET
+    cash_balance = $2
+WHERE id = $1
+RETURNING id, user_id, cash_balance, created_at, updated_at
+`
+
+type UpdateAccountBalanceParams struct {
+	ID          int64          `json:"id"`
+	CashBalance pgtype.Numeric `json:"cash_balance"`
+}
+
+func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (Account, error) {
+	row := q.db.QueryRow(ctx, updateAccountBalance, arg.ID, arg.CashBalance)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CashBalance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateOrder = `-- name: UpdateOrder :one

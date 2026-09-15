@@ -13,3 +13,11 @@ func IsUniqueViolation(err error, constraint string) bool {
 		pgErr.Code == "23505" &&
 		pgErr.ConstraintName == constraint
 }
+
+func IsConstraintViolation(err error, constraint string) bool {
+	var pgErr *pgconn.PgError
+
+	return errors.As(err, &pgErr) &&
+		pgErr.Code == "23514" &&
+		pgErr.ConstraintName == constraint
+}
