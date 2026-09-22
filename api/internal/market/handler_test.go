@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -66,8 +67,8 @@ func setupMarketTestRouter(service MarketService) *gin.Engine {
 
 	// protected := r.Group("")
 	r.GET("/market/stocks", handler.SearchStocks)
-	r.GET("/market/stocks/:symbol", handler.GetStockDetails)
-	r.GET("/market/stocks/:symbol/candles", handler.GetCandles)
+	r.GET("/market/stocks/details", handler.GetStockDetails)
+	r.GET("/market/stocks/candles", handler.GetCandles)
 
 	return r
 }
@@ -159,25 +160,40 @@ func TestGetCandles(t *testing.T) {
 		expectedCode int
 	}{
 		{
+			name:         "missing symbol",
+			query:        "?interval=1h&outputSize=10",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
 			name:         "invalid interval",
-			query:        "?interval=year&outputSize=10",
+			query:        "?symbol=aapl&interval=year&outputSize=10",
 			expectedCode: http.StatusBadRequest,
 		},
 		{
 			name:         "service error",
-			query:        "?interval=1h&outputSize=10",
+			query:        "?symbol=aapl&interval=1h&outputSize=10",
 			serviceErr:   errors.New("service error"),
 			expectedCode: http.StatusInternalServerError,
 		},
 		{
 			name:         "not found candles",
-			query:        "?interval=1h&outputSize=10",
+			query:        "?symbol=aapl&interval=1h&outputSize=10",
 			serviceErr:   ErrStockNotFound,
 			expectedCode: http.StatusNotFound,
 		},
 		{
 			name:  "success",
-			query: "?interval=1h&outputSize=10",
+			query: "?symbol=aapl&interval=1h&outputSize=10",
+			candles: []GetCandleResponse{
+				{
+					Datetime: time.Now().String(),
+				},
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:  "symbol containing a slash (crypto pair)",
+			query: "?symbol=" + url.QueryEscape("BTC/USD") + "&interval=1h&outputSize=10",
 			candles: []GetCandleResponse{
 				{
 					Datetime: time.Now().String(),
@@ -198,7 +214,7 @@ func TestGetCandles(t *testing.T) {
 
 			r := setupMarketTestRouter(service)
 
-			w := makeRequest(r, "/market/stocks/aapl/candles"+tt.query, http.MethodGet)
+			w := makeRequest(r, "/market/stocks/candles"+tt.query, http.MethodGet)
 
 			assert.Equal(t, tt.expectedCode, w.Code)
 
@@ -219,24 +235,41 @@ func TestGetCandles(t *testing.T) {
 func TestGetStockDetails(t *testing.T) {
 	tests := []struct {
 		name         string
+		query        string
 		details      GetStockDetailsResponse
 		serviceErr   error
 		expectedCode int
 	}{
 		{
+			name:         "missing symbol",
+			query:        "",
+			expectedCode: http.StatusBadRequest,
+		},
+		{
 			name:         "service error",
+			query:        "?symbol=aapl",
 			serviceErr:   errors.New("service error"),
 			expectedCode: http.StatusInternalServerError,
 		},
 		{
 			name:         "stock detail not found",
+			query:        "?symbol=aapl",
 			serviceErr:   ErrMarketProviderUnavailable,
 			expectedCode: http.StatusServiceUnavailable,
 		},
 		{
-			name: "success",
+			name:  "success",
+			query: "?symbol=aapl",
 			details: GetStockDetailsResponse{
 				Name: "test company",
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:  "symbol containing a slash (crypto pair)",
+			query: "?symbol=" + url.QueryEscape("BTC/USD"),
+			details: GetStockDetailsResponse{
+				Name: "Bitcoin US Dollar",
 			},
 			expectedCode: http.StatusOK,
 		},
@@ -252,7 +285,7 @@ func TestGetStockDetails(t *testing.T) {
 
 			r := setupMarketTestRouter(service)
 
-			w := makeRequest(r, "/market/stocks/aapl", http.MethodGet)
+			w := makeRequest(r, "/market/stocks/details"+tt.query, http.MethodGet)
 
 			assert.Equal(t, tt.expectedCode, w.Code)
 

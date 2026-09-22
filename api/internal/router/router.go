@@ -31,8 +31,8 @@ func SetupRouter(
 	protected.Use(auth.AuthMiddleware(jwtSecret))
 
 	protected.GET("/market/stocks", marketHandler.SearchStocks)
-	protected.GET("/market/stocks/:symbol", marketHandler.GetStockDetails)
-	protected.GET("/market/stocks/:symbol/candles", marketHandler.GetCandles)
+	protected.GET("/market/stocks/details", marketHandler.GetStockDetails)
+	protected.GET("/market/stocks/candles", marketHandler.GetCandles)
 	protected.GET("/market/ws", hub.Connect)
 
 	protected.GET("/watchlist", watchlistHandler.GetWatchlist)

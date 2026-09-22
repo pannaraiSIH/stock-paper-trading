@@ -121,8 +121,9 @@ func (r *tradingRepository) executeSellOrder(
 		}
 	} else {
 		_, err = qxt.UpdatePosition(ctx, queries.UpdatePositionParams{
-			ID:       position.ID,
-			Quantity: newQuantity,
+			ID:           position.ID,
+			Quantity:     newQuantity,
+			AveragePrice: position.AveragePrice,
 		})
 		if err != nil {
 			return err
@@ -264,8 +265,10 @@ func (r *tradingRepository) ExecuteOrder(
 			errors.Is(err, ErrInsufficientShares) ||
 			errors.Is(err, ErrInvalidOrderSide) {
 			rejectedOrder, updateErr := r.store.UpdateOrder(ctx, queries.UpdateOrderParams{
-				ID:     pendingOrder.ID,
-				Status: "rejected",
+				ID:             pendingOrder.ID,
+				ExecutionPrice: pendingOrder.ExecutionPrice,
+				TotalValue:     pendingOrder.TotalValue,
+				Status:         "rejected",
 			})
 			if updateErr != nil {
 				return queries.Order{}, updateErr
@@ -278,8 +281,10 @@ func (r *tradingRepository) ExecuteOrder(
 	}
 
 	executedOrder, err := qxt.UpdateOrder(ctx, queries.UpdateOrderParams{
-		ID:     pendingOrder.ID,
-		Status: "executed",
+		ID:             pendingOrder.ID,
+		ExecutionPrice: pendingOrder.ExecutionPrice,
+		TotalValue:     pendingOrder.TotalValue,
+		Status:         "executed",
 	})
 	if err != nil {
 		return queries.Order{}, err

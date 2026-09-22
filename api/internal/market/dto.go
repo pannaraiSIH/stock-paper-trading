@@ -13,8 +13,13 @@ type SearchStocksResponse struct {
 }
 
 type GetCandlesQuery struct {
+	Symbol     string   `form:"symbol" binding:"required"`
 	Interval   Interval `form:"interval" binding:"required,oneof=1min 5min 1h 1day"`
 	OutputSize int64    `form:"outputSize" binding:"required"`
+}
+
+type GetStockDetailsQuery struct {
+	Symbol string `form:"symbol" binding:"required"`
 }
 
 type GetCandleResponse struct {

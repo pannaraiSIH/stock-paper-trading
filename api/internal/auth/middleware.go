@@ -11,22 +11,14 @@ import (
 
 func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader("Authorization")
-		if authHeader == "" {
+		tokenString, ok := bearerToken(ctx)
+		if !ok {
 			response.Unauthorized(ctx, "unauthorized")
 			ctx.Abort()
 			return
 		}
 
-		parts := strings.SplitN(authHeader, " ", 2)
-
-		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			response.Unauthorized(ctx, "unauthorized")
-			ctx.Abort()
-			return
-		}
-
-		token, err := jwt.ParseWithClaims(parts[1], &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(t *jwt.Token) (interface{}, error) {
 			if t.Method != jwt.SigningMethodHS256 {
 				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 			}
@@ -48,4 +40,23 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		ctx.Set("userID", claims.UserID)
 		ctx.Next()
 	}
+}
+
+func bearerToken(ctx *gin.Context) (string, bool) {
+	authHeader := ctx.GetHeader("Authorization")
+	if authHeader != "" {
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) == 2 && parts[0] == "Bearer" {
+			return parts[1], true
+		}
+		return "", false
+	}
+
+	if strings.EqualFold(ctx.GetHeader("Upgrade"), "websocket") {
+		if token := ctx.Query("token"); token != "" {
+			return token, true
+		}
+	}
+
+	return "", false
 }

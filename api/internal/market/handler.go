@@ -36,8 +36,6 @@ func (h *MarketHandler) SearchStocks(c *gin.Context) {
 }
 
 func (h *MarketHandler) GetCandles(c *gin.Context) {
-	symbol := c.Param("symbol")
-
 	var query GetCandlesQuery
 
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -45,7 +43,7 @@ func (h *MarketHandler) GetCandles(c *gin.Context) {
 		return
 	}
 
-	candles, err := h.service.GetCandles(c, symbol, query)
+	candles, err := h.service.GetCandles(c, query.Symbol, query)
 	if err != nil {
 		handleMarketError(c, err, "failed to get candles")
 		return
@@ -55,9 +53,14 @@ func (h *MarketHandler) GetCandles(c *gin.Context) {
 }
 
 func (h *MarketHandler) GetStockDetails(c *gin.Context) {
-	symbol := c.Param("symbol")
+	var query GetStockDetailsQuery
 
-	detail, err := h.service.GetStockDetails(c, symbol)
+	if err := c.ShouldBindQuery(&query); err != nil {
+		response.BadRequest(c, ErrInvalidQueryParameters.Error())
+		return
+	}
+
+	detail, err := h.service.GetStockDetails(c, query.Symbol)
 	if err != nil {
 		handleMarketError(c, err, "failed to get stock details")
 		return
