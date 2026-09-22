@@ -13,6 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
+import { fmtUSD } from "@/lib/format";
 import type {
   Candle,
   CandleInterval,
@@ -226,9 +227,19 @@ function DashboardPageInner() {
     if (!activeSymbol) return;
     setOrderSubmitting(true);
     try {
-      await api.createOrder(activeSymbol, side, quantity);
+      const order = await api.createOrder(activeSymbol, side, quantity);
       const [pos] = await Promise.all([api.getPositions(), refreshAccount()]);
       setPositions(pos);
+      if (order.status === "rejected") {
+        toast.error(`Order for ${quantity} ${activeSymbol} was rejected.`);
+      } else {
+        const verb = side === "buy" ? "Bought" : "Sold";
+        const priceLabel =
+          order.executionPrice !== null
+            ? ` at ${fmtUSD(order.executionPrice)}`
+            : "";
+        toast(`${verb} ${quantity} ${activeSymbol}${priceLabel}.`);
+      }
     } catch (err) {
       toast.error(errorMessage(err, "Order failed."));
     } finally {
