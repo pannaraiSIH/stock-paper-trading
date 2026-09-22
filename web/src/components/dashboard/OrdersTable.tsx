@@ -2,7 +2,14 @@ import { memo } from "react";
 import { fmtUSD } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Order, OrderSide, OrderStatus } from "@/types";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
 interface OrdersTableProps {
@@ -10,8 +17,10 @@ interface OrdersTableProps {
   limit?: number;
 }
 
-const numHeadCls = "text-right font-mono text-[0.68rem] tracking-wide uppercase text-muted-foreground";
-const headCls = "font-mono text-[0.68rem] tracking-wide uppercase text-muted-foreground";
+const numHeadCls =
+  "text-right font-mono text-[0.68rem] tracking-wide uppercase text-muted-foreground";
+const headCls =
+  "font-mono text-[0.68rem] tracking-wide uppercase text-muted-foreground";
 
 const SIDE_STYLES: Record<OrderSide, string> = {
   buy: "border-transparent bg-[var(--color-positive)]/12 text-[var(--color-positive)]",
@@ -45,7 +54,10 @@ export const OrdersTable = memo(function OrdersTable({
         <TableBody>
           {orders.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={6} className="py-4 text-center text-sm whitespace-normal text-muted-foreground">
+              <TableCell
+                colSpan={6}
+                className="py-4 text-center text-sm whitespace-normal text-muted-foreground"
+              >
                 No orders yet.
               </TableCell>
             </TableRow>
@@ -55,18 +67,32 @@ export const OrdersTable = memo(function OrdersTable({
                 <TableCell className="font-mono">ORD-{order.id}</TableCell>
                 <TableCell className="font-mono">{order.symbol}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={cn("font-mono font-semibold", SIDE_STYLES[order.side])}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "font-mono font-semibold",
+                      SIDE_STYLES[order.side],
+                    )}
+                  >
                     {order.side.toUpperCase()}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right font-mono tabular-nums">
-                  {order.executionPrice === null ? "—" : fmtUSD(order.executionPrice)}
+                  {order.executionPrice === null
+                    ? "—"
+                    : fmtUSD(order.executionPrice)}
                 </TableCell>
                 <TableCell className="text-right font-mono tabular-nums">
                   {order.totalValue === null ? "—" : fmtUSD(order.totalValue)}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={cn("font-mono uppercase", STATUS_STYLES[order.status])}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "font-mono uppercase",
+                      STATUS_STYLES[order.status],
+                    )}
+                  >
                     {order.status}
                   </Badge>
                 </TableCell>

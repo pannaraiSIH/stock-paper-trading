@@ -16,7 +16,14 @@ interface OrderTicketProps {
   onSubmit: (side: OrderSide, quantity: number) => Promise<void>;
 }
 
-export function OrderTicket({ symbol, price, cash, ownedQty, submitting, onSubmit }: OrderTicketProps) {
+export function OrderTicket({
+  symbol,
+  price,
+  cash,
+  ownedQty,
+  submitting,
+  onSubmit,
+}: OrderTicketProps) {
   const [side, setSide] = useState<OrderSide>("buy");
   const [qtyInput, setQtyInput] = useState("");
 
@@ -25,7 +32,8 @@ export function OrderTicket({ symbol, price, cash, ownedQty, submitting, onSubmi
 
   const error = useMemo(() => {
     if (qtyInput === "") return "";
-    if (!Number.isInteger(qty) || qty <= 0) return "Enter a whole number of shares greater than zero.";
+    if (!Number.isInteger(qty) || qty <= 0)
+      return "Enter a whole number of shares greater than zero.";
     if (!symbol) return "Pick a symbol first.";
     if (price === null) return "Waiting for a live price for this symbol.";
     if (side === "buy" && total > cash) {
@@ -50,16 +58,16 @@ export function OrderTicket({ symbol, price, cash, ownedQty, submitting, onSubmi
   return (
     <div className="panel panel--ticket">
       <Tabs value={side} onValueChange={(value) => setSide(value as OrderSide)}>
-        <TabsList className="mb-4 h-auto w-full rounded-md bg-muted p-[3px]">
+        <TabsList className="mb-4 h-auto w-full rounded-md bg-muted p-0.75">
           <TabsTrigger
             value="buy"
-            className="h-9 font-medium data-[state=active]:bg-[var(--color-positive)]/12 data-[state=active]:text-[var(--color-positive)] data-[state=active]:shadow-none"
+            className="h-9 font-medium data-[state=active]:bg-positive/12 data-[state=active]:text-positive data-[state=active]:shadow-none"
           >
             Buy
           </TabsTrigger>
           <TabsTrigger
             value="sell"
-            className="h-9 font-medium data-[state=active]:bg-[var(--color-negative)]/12 data-[state=active]:text-[var(--color-negative)] data-[state=active]:shadow-none"
+            className="h-9 font-medium data-[state=active]:bg-negative/12 data-[state=active]:text-negative data-[state=active]:shadow-none"
           >
             Sell
           </TabsTrigger>
@@ -86,7 +94,10 @@ export function OrderTicket({ symbol, price, cash, ownedQty, submitting, onSubmi
           />
           <p
             id="qtyHelper"
-            className={cn("min-h-[1lh] text-xs text-muted-foreground", error && "text-destructive")}
+            className={cn(
+              "min-h-lh text-xs text-muted-foreground",
+              error && "text-destructive",
+            )}
           >
             {error || " "}
           </p>
@@ -107,7 +118,9 @@ export function OrderTicket({ symbol, price, cash, ownedQty, submitting, onSubmi
           </div>
           <div>
             <dt>{side === "buy" ? "Cash available" : "Shares owned"}</dt>
-            <dd className="mono">{side === "buy" ? fmtUSD(cash) : fmtQty(ownedQty)}</dd>
+            <dd className="mono">
+              {side === "buy" ? fmtUSD(cash) : fmtQty(ownedQty)}
+            </dd>
           </div>
         </dl>
 
@@ -117,8 +130,8 @@ export function OrderTicket({ symbol, price, cash, ownedQty, submitting, onSubmi
           className={cn(
             "h-11 font-semibold",
             side === "buy"
-              ? "bg-[var(--color-positive)] text-[var(--color-positive-ink)] hover:bg-[var(--color-positive)]/90"
-              : "bg-[var(--color-negative)] text-[var(--color-negative-ink)] hover:bg-[var(--color-negative)]/90"
+              ? "bg-positive text-(--color-positive-ink) hover:bg-positive/90"
+              : "bg-negative text-(--color-negative-ink) hover:bg-negative/90",
           )}
         >
           {side === "buy" ? `Buy ${symbol || ""}` : `Sell ${symbol || ""}`}

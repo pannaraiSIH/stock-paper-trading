@@ -20,7 +20,12 @@ interface CommandPaletteProps {
   livePrices: Record<string, number>;
 }
 
-export function CommandPalette({ open, onClose, onSelect, livePrices }: CommandPaletteProps) {
+export function CommandPalette({
+  open,
+  onClose,
+  onSelect,
+  livePrices,
+}: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<StockSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -73,7 +78,11 @@ export function CommandPalette({ open, onClose, onSelect, livePrices }: CommandP
         />
         <CommandList>
           <CommandEmpty>
-            {searching ? "Searching…" : query.trim() ? "No symbols match your search." : "Type to search a symbol or company."}
+            {searching
+              ? "Searching…"
+              : query.trim()
+                ? "No symbols match your search."
+                : "Type to search a symbol or company."}
           </CommandEmpty>
           <CommandGroup>
             {results.map((result) => (
@@ -85,7 +94,9 @@ export function CommandPalette({ open, onClose, onSelect, livePrices }: CommandP
                   onClose();
                 }}
               >
-                <span className="font-mono font-semibold text-foreground">{result.symbol}</span>
+                <span className="font-mono font-semibold text-foreground">
+                  {result.symbol}
+                </span>
                 <span className="flex-1 truncate text-muted-foreground">
                   {result.name} &middot; {result.exchange}
                 </span>
