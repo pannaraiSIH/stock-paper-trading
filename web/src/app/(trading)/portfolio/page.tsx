@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { Position } from "@/types";
 import { PositionsTable } from "@/components/dashboard/PositionsTable";
 import { PageLoading } from "@/components/PageLoading";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function PortfolioPage() {
   const { account } = useTradingStore();
@@ -93,29 +94,41 @@ export default function PortfolioPage() {
           className="row reveal grid-cols-3 max-[40rem]:grid-cols-1"
           style={{ "--i": 1 } as React.CSSProperties}
         >
-          <div className="panel">
-            <span className="panel__title">Cash available</span>
-            <span className="price mono block">
-              {fmtUSD(account?.cashBalance ?? 0)}
-            </span>
-          </div>
-          <div className="panel">
-            <span className="panel__title">Market value</span>
-            <span className="price mono block">
-              {fmtUSD(summary.marketValue)}
-            </span>
-          </div>
-          <div className="panel">
-            <span className="panel__title">Unrealized P&amp;L</span>
-            <span
-              className={cn(
-                "price mono block",
-                up ? "text-positive" : "text-negative",
-              )}
-            >
-              {fmtSigned(summary.pl)} ({fmtPct(summary.plPct)})
-            </span>
-          </div>
+          <Card className="min-w-0">
+            <CardContent className="gap-1.5">
+              <span className="panel__title" style={{ marginBottom: 0 }}>
+                Cash available
+              </span>
+              <span className="block wrap-break-word font-mono text-base font-semibold tabular-nums text-foreground max-[40rem]:text-xl xl:text-lg">
+                {fmtUSD(account?.cashBalance ?? 0)}
+              </span>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardContent className="gap-1.5">
+              <span className="panel__title" style={{ marginBottom: 0 }}>
+                Market value
+              </span>
+              <span className="block wrap-break-word font-mono text-base font-semibold tabular-nums text-foreground max-[40rem]:text-xl xl:text-lg">
+                {fmtUSD(summary.marketValue)}
+              </span>
+            </CardContent>
+          </Card>
+          <Card className="min-w-0">
+            <CardContent className="gap-1.5">
+              <span className="panel__title" style={{ marginBottom: 0 }}>
+                Unrealized P&amp;L
+              </span>
+              <span
+                className={cn(
+                  "block wrap-break-word font-mono text-base font-semibold tabular-nums max-[40rem]:text-xl xl:text-lg",
+                  up ? "text-positive" : "text-negative",
+                )}
+              >
+                {fmtSigned(summary.pl)} ({fmtPct(summary.plPct)})
+              </span>
+            </CardContent>
+          </Card>
         </section>
 
         <section

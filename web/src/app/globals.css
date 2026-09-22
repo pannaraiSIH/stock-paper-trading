@@ -519,54 +519,11 @@
 
 /* ————— Watchlist ————— */
 
-.watchlist {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.watchlist li {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--color-rule);
-}
-.watchlist li:last-child {
-  border-bottom: none;
-}
-.watchlist__symbol-btn {
-  display: flex;
-  align-items: center;
-  text-align: left;
-  padding: 0;
-  min-width: 0;
-  min-height: 2.75rem;
-  flex: 1;
-}
-.watchlist__symbol-btn.is-active .watchlist__ticker {
-  color: var(--color-accent);
-}
-.watchlist__symbol-btn:focus-visible {
-  outline-offset: 3px;
-}
-.watchlist__symbol {
-  display: flex;
-  flex-direction: column;
-  min-width: 5rem;
-}
 .watchlist__empty {
   color: var(--color-muted);
   font-size: var(--text-sm);
   padding: var(--space-md) 0;
   text-align: center;
-}
-.watchlist__ticker {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  color: var(--color-ink);
 }
 .watchlist__name {
   font-size: 0.72rem;
@@ -574,20 +531,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.watchlist__price {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-ink);
-  text-align: right;
-}
-.watchlist__change {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  text-align: right;
-  min-width: 4.5rem;
 }
 
 /* ————— Status bar (footer) ————— */

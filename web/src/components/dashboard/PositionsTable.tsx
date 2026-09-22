@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 interface PositionsTableProps {
   positions: Position[];
@@ -27,7 +28,7 @@ export const PositionsTable = memo(function PositionsTable({
   onSelectSymbol,
 }: PositionsTableProps) {
   return (
-    <div className="panel panel--table">
+    <div className="panel panel--table min-w-0">
       <h2 className="panel__title">Open positions</h2>
       <Table>
         <TableHeader>
@@ -66,13 +67,14 @@ export const PositionsTable = memo(function PositionsTable({
                 <TableRow key={position.id}>
                   <TableCell className="font-mono">
                     {onSelectSymbol ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="link"
                         onClick={() => onSelectSymbol(position.symbol)}
-                        className="text-foreground underline-offset-2 hover:underline"
+                        className="h-auto p-0 text-foreground underline-offset-2"
                       >
                         {position.symbol}
-                      </button>
+                      </Button>
                     ) : (
                       position.symbol
                     )}

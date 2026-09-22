@@ -1,6 +1,15 @@
 import { memo } from "react";
 import { fmtPct, fmtUSD } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { WatchlistItem } from "@/types";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "../icons";
 
@@ -18,6 +27,12 @@ interface WatchlistPanelProps {
   onRemove: (item: WatchlistItem) => void;
 }
 
+const headCls =
+  "font-mono text-[0.68rem] tracking-wide uppercase text-muted-foreground";
+const numHeadCls =
+  "text-right font-mono text-[0.68rem] tracking-wide uppercase text-muted-foreground";
+const numCellCls = "text-right font-mono tabular-nums";
+
 export const WatchlistPanel = memo(function WatchlistPanel({
   rows,
   activeSymbol,
@@ -25,60 +40,92 @@ export const WatchlistPanel = memo(function WatchlistPanel({
   onRemove,
 }: WatchlistPanelProps) {
   return (
-    <div className="panel panel--list">
+    <div className="panel panel--table min-w-0">
       <h2 className="panel__title">Watchlist</h2>
-      {rows.length === 0 ? (
-        <p className="watchlist__empty">
-          No symbols yet. Search above to add one.
-        </p>
-      ) : (
-        <ul className="watchlist">
-          {rows.map(({ item, name, livePrice, prevClose }) => {
-            const price = livePrice ?? item.price;
-            const change =
-              price !== null && prevClose !== null ? price - prevClose : null;
-            const changePct =
-              change !== null && prevClose ? (change / prevClose) * 100 : null;
-            const up = (change ?? 0) >= 0;
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className={headCls}>Symbol</TableHead>
+            <TableHead className={numHeadCls}>Price</TableHead>
+            <TableHead className={numHeadCls}>Change</TableHead>
+            <TableHead className="w-10" />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.length === 0 ? (
+            <TableRow className="hover:bg-transparent">
+              <TableCell
+                colSpan={4}
+                className="py-4 text-center text-sm whitespace-normal text-muted-foreground"
+              >
+                No symbols yet. Search above to add one.
+              </TableCell>
+            </TableRow>
+          ) : (
+            rows.map(({ item, name, livePrice, prevClose }) => {
+              const price = livePrice ?? item.price;
+              const change =
+                price !== null && prevClose !== null
+                  ? price - prevClose
+                  : null;
+              const changePct =
+                change !== null && prevClose
+                  ? (change / prevClose) * 100
+                  : null;
+              const up = (change ?? 0) >= 0;
+              const active = item.symbol === activeSymbol;
 
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  className={`watchlist__symbol-btn${item.symbol === activeSymbol ? " is-active" : ""}`}
-                  aria-label={`Open ${item.symbol}`}
-                  onClick={() => onSelect(item.symbol)}
-                >
-                  <span className="watchlist__symbol">
-                    <span className="watchlist__ticker">{item.symbol}</span>
-                    <span className="watchlist__name">{name ?? " "}</span>
-                  </span>
-                </button>
-                <span className="watchlist__price">
-                  {price === null ? "—" : fmtUSD(price)}
-                </span>
-                <span
-                  className={`watchlist__change ${up ? "change--up" : "change--down"}`}
-                >
-                  {changePct === null
-                    ? " "
-                    : `${up ? "▲" : "▼"} ${fmtPct(changePct)}`}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-7 shrink-0 text-muted-foreground hover:text-negative"
-                  aria-label={`Remove ${item.symbol} from watchlist`}
-                  onClick={() => onRemove(item)}
-                >
-                  <XIcon className="size-3.5" />
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              return (
+                <TableRow key={item.id}>
+                  <TableCell className="font-mono">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => onSelect(item.symbol)}
+                      className={cn(
+                        "h-auto p-0 underline-offset-2",
+                        active ? "text-primary" : "text-foreground",
+                      )}
+                    >
+                      {item.symbol}
+                    </Button>
+                    {name && (
+                      <span className="ml-2 font-sans text-muted-foreground">
+                        {name}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className={numCellCls}>
+                    {price === null ? "—" : fmtUSD(price)}
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      numCellCls,
+                      changePct !== null && (up ? "text-positive" : "text-negative"),
+                    )}
+                  >
+                    {changePct === null
+                      ? "—"
+                      : `${up ? "▲" : "▼"} ${fmtPct(changePct)}`}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-7 shrink-0 text-muted-foreground hover:text-negative"
+                      aria-label={`Remove ${item.symbol} from watchlist`}
+                      onClick={() => onRemove(item)}
+                    >
+                      <XIcon className="size-3.5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 });

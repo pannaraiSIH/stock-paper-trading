@@ -38,7 +38,7 @@ export const OrdersTable = memo(function OrdersTable({
   limit = 12,
 }: OrdersTableProps) {
   return (
-    <div className="panel panel--table">
+    <div className="panel panel--table min-w-0">
       <h2 className="panel__title">Order history</h2>
       <Table>
         <TableHeader>

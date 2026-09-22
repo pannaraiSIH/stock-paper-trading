@@ -3,6 +3,7 @@ import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface TopbarProps {
   connected?: boolean;
@@ -50,14 +51,11 @@ export const Topbar = memo(function Topbar({
         </div>
       )}
 
-      <Button
-        variant="outline"
-        size="icon"
-        aria-label="Account menu"
-        className="ml-auto rounded-md font-mono text-xs max-sm:order-2"
-      >
-        {avatarInitials}
-      </Button>
+      <Avatar className="ml-auto rounded-md after:rounded-md max-sm:order-2">
+        <AvatarFallback className="rounded-md font-mono text-xs">
+          {avatarInitials}
+        </AvatarFallback>
+      </Avatar>
     </header>
   );
 });
