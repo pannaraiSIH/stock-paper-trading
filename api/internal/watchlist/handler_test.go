@@ -82,6 +82,19 @@ func (m *MockWatchlistService) DeleteWatchlistItem(
 type MockMarketCache struct {
 	GetLatestPriceFunc func(ctx context.Context, symbol string) (market.PriceEvent, error)
 	SetLatestPriceFunc func(ctx context.Context, symbol string, price market.PriceEvent) error
+	GetCandlesFunc     func(
+		ctx context.Context,
+		symbol string,
+		interval market.Interval,
+		outputSize int64,
+	) ([]market.GetCandleResponse, error)
+	SetCandlesFunc func(
+		ctx context.Context,
+		symbol string,
+		candles []market.GetCandleResponse,
+		interval market.Interval,
+		outputSize int64,
+	) error
 }
 
 func (m *MockMarketCache) GetLatestPrice(
@@ -97,6 +110,25 @@ func (m *MockMarketCache) SetLatestPrice(
 	price market.PriceEvent,
 ) error {
 	return m.SetLatestPriceFunc(ctx, symbol, price)
+}
+
+func (m *MockMarketCache) GetCandles(
+	ctx context.Context,
+	symbol string,
+	interval market.Interval,
+	outputSize int64,
+) ([]market.GetCandleResponse, error) {
+	return m.GetCandlesFunc(ctx, symbol, interval, outputSize)
+}
+
+func (m *MockMarketCache) SetCandles(
+	ctx context.Context,
+	symbol string,
+	candles []market.GetCandleResponse,
+	interval market.Interval,
+	outputSize int64,
+) error {
+	return m.SetCandlesFunc(ctx, symbol, candles, interval, outputSize)
 }
 
 func setupWatchlistTestRouter(

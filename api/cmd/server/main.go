@@ -63,7 +63,7 @@ func main() {
 	authService := auth.NewAuthService(authRepository, cfg.JWTSecret)
 	authHandler := auth.NewAuthHandler(authService)
 
-	marketService := market.NewMarketService(marketDataClient)
+	marketService := market.NewMarketService(marketDataClient, marketCache)
 	markHandler := market.NewMarketHandler(marketService)
 
 	watchlistRepository := watchlist.NewWatchlistRepository(store)

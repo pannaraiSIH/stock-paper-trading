@@ -70,6 +70,19 @@ func (m *MockHubManager) SubscriptionEvent() <-chan SubscribeEvent {
 type MockMarketCache struct {
 	GetLatestPriceFunc func(ctx context.Context, symbol string) (PriceEvent, error)
 	SetLatestPriceFunc func(ctx context.Context, symbol string, price PriceEvent) error
+	GetCandlesFunc     func(
+		ctx context.Context,
+		symbol string,
+		interval Interval,
+		outputSize int64,
+	) ([]GetCandleResponse, error)
+	SetCandlesFunc func(
+		ctx context.Context,
+		symbol string,
+		candles []GetCandleResponse,
+		interval Interval,
+		outputSize int64,
+	) error
 }
 
 func (m *MockMarketCache) GetLatestPrice(
@@ -85,6 +98,25 @@ func (m *MockMarketCache) SetLatestPrice(
 	price PriceEvent,
 ) error {
 	return m.SetLatestPriceFunc(ctx, symbol, price)
+}
+
+func (m *MockMarketCache) GetCandles(
+	ctx context.Context,
+	symbol string,
+	interval Interval,
+	outputSize int64,
+) ([]GetCandleResponse, error) {
+	return m.GetCandlesFunc(ctx, symbol, interval, outputSize)
+}
+
+func (m *MockMarketCache) SetCandles(
+	ctx context.Context,
+	symbol string,
+	candles []GetCandleResponse,
+	interval Interval,
+	outputSize int64,
+) error {
+	return m.SetCandlesFunc(ctx, symbol, candles, interval, outputSize)
 }
 
 func TestRunWorker(t *testing.T) {
