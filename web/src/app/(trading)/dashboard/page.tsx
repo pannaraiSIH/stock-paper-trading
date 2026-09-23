@@ -252,18 +252,9 @@ function DashboardPageInner() {
     setActiveSymbol(result.symbol);
   }
 
-  const handleOpenSearch = useCallback(() => setPaletteOpen(true), []);
-
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setPaletteOpen((v) => !v);
-      }
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  function handleOpenSearch() {
+    setPaletteOpen(true);
+  }
 
   const livePriceMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -341,10 +332,6 @@ function DashboardPageInner() {
           />
         </section>
       </main>
-
-      <footer className="statusbar">
-        <span>Paperline &mdash; paper trading sandbox</span>
-      </footer>
 
       <CommandPalette
         open={paletteOpen}

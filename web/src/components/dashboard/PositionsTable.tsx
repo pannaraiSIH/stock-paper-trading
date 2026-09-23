@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { fmtPct, fmtQty, fmtSigned, fmtUSD } from "@/lib/format";
+import { calculatePositionPL } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
 import type { Position } from "@/types";
 import {
@@ -66,12 +67,10 @@ export const PositionsTable = memo(function PositionsTable({
             </TableRow>
           ) : (
             positions.map((position) => {
-              const current =
-                livePrices[position.symbol] ?? position.averagePrice;
-              const marketValue = position.quantity * current;
-              const costBasis = position.quantity * position.averagePrice;
-              const pl = marketValue - costBasis;
-              const plPct = costBasis ? (pl / costBasis) * 100 : 0;
+              const { current, marketValue, pl, plPct } = calculatePositionPL(
+                position,
+                livePrices[position.symbol],
+              );
               const up = pl >= 0;
 
               return (

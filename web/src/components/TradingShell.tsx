@@ -86,6 +86,10 @@ export function TradingShell({ children }: { children: React.ReactNode }) {
         ) : (
           children
         )}
+
+        <footer className="statusbar">
+          <span>Paperline &mdash; paper trading sandbox</span>
+        </footer>
       </div>
     </div>
   );

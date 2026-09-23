@@ -184,10 +184,6 @@ export default function WatchlistPage() {
         </section>
       </main>
 
-      <footer className="statusbar">
-        <span>Paperline &mdash; paper trading sandbox</span>
-      </footer>
-
       <CommandPalette
         open={addOpen}
         onClose={() => setAddOpen(false)}

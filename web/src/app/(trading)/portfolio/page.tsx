@@ -8,6 +8,7 @@ import { useMarketStore } from "@/stores/marketStore";
 import { api, PAGE_SIZE } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { fmtPct, fmtSigned, fmtUSD } from "@/lib/format";
+import { calculatePortfolioSummary } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
 import type { Position } from "@/types";
 import { PositionsTable } from "@/components/dashboard/PositionsTable";
@@ -79,18 +80,10 @@ export default function PortfolioPage() {
     return map;
   }, [prices]);
 
-  const summary = useMemo(() => {
-    let marketValue = 0;
-    let costBasis = 0;
-    for (const position of positions) {
-      const current = livePriceMap[position.symbol] ?? position.averagePrice;
-      marketValue += position.quantity * current;
-      costBasis += position.quantity * position.averagePrice;
-    }
-    const pl = marketValue - costBasis;
-    const plPct = costBasis ? (pl / costBasis) * 100 : 0;
-    return { marketValue, pl, plPct };
-  }, [positions, livePriceMap]);
+  const summary = useMemo(
+    () => calculatePortfolioSummary(positions, livePriceMap),
+    [positions, livePriceMap],
+  );
 
   const handleSelectSymbol = useCallback(
     (symbol: string) =>
@@ -105,78 +98,72 @@ export default function PortfolioPage() {
   const up = summary.pl >= 0;
 
   return (
-    <>
-      <main id="main" className="main">
-        <section
-          className="row reveal"
-          style={{ "--i": 0 } as React.CSSProperties}
-        >
-          <h1 className="text-lg font-display font-semibold text-foreground">
-            Portfolio
-          </h1>
-        </section>
+    <main id="main" className="main">
+      <section
+        className="row reveal"
+        style={{ "--i": 0 } as React.CSSProperties}
+      >
+        <h1 className="text-lg font-display font-semibold text-foreground">
+          Portfolio
+        </h1>
+      </section>
 
-        <section
-          className="row reveal grid-cols-3 max-[40rem]:grid-cols-1"
-          style={{ "--i": 1 } as React.CSSProperties}
-        >
-          <Card className="min-w-0">
-            <CardContent className="gap-1.5">
-              <span className="panel__title" style={{ marginBottom: 0 }}>
-                Cash available
-              </span>
-              <span className="block wrap-break-word font-mono text-base font-semibold tabular-nums text-foreground max-[40rem]:text-xl xl:text-lg">
-                {fmtUSD(account?.cashBalance ?? 0)}
-              </span>
-            </CardContent>
-          </Card>
-          <Card className="min-w-0">
-            <CardContent className="gap-1.5">
-              <span className="panel__title" style={{ marginBottom: 0 }}>
-                Market value
-              </span>
-              <span className="block wrap-break-word font-mono text-base font-semibold tabular-nums text-foreground max-[40rem]:text-xl xl:text-lg">
-                {fmtUSD(summary.marketValue)}
-              </span>
-            </CardContent>
-          </Card>
-          <Card className="min-w-0">
-            <CardContent className="gap-1.5">
-              <span className="panel__title" style={{ marginBottom: 0 }}>
-                Unrealized P&amp;L
-              </span>
-              <span
-                className={cn(
-                  "block wrap-break-word font-mono text-base font-semibold tabular-nums max-[40rem]:text-xl xl:text-lg",
-                  up ? "text-positive" : "text-negative",
-                )}
-              >
-                {fmtSigned(summary.pl)} ({fmtPct(summary.plPct)})
-              </span>
-            </CardContent>
-          </Card>
-        </section>
+      <section
+        className="row reveal grid-cols-3 max-[40rem]:grid-cols-1"
+        style={{ "--i": 1 } as React.CSSProperties}
+      >
+        <Card className="min-w-0">
+          <CardContent className="gap-1.5">
+            <span className="panel__title" style={{ marginBottom: 0 }}>
+              Cash available
+            </span>
+            <span className="block wrap-break-word font-mono text-base font-semibold tabular-nums text-foreground max-[40rem]:text-xl xl:text-lg">
+              {fmtUSD(account?.cashBalance ?? 0)}
+            </span>
+          </CardContent>
+        </Card>
+        <Card className="min-w-0">
+          <CardContent className="gap-1.5">
+            <span className="panel__title" style={{ marginBottom: 0 }}>
+              Market value
+            </span>
+            <span className="block wrap-break-word font-mono text-base font-semibold tabular-nums text-foreground max-[40rem]:text-xl xl:text-lg">
+              {fmtUSD(summary.marketValue)}
+            </span>
+          </CardContent>
+        </Card>
+        <Card className="min-w-0">
+          <CardContent className="gap-1.5">
+            <span className="panel__title" style={{ marginBottom: 0 }}>
+              Unrealized P&amp;L
+            </span>
+            <span
+              className={cn(
+                "block wrap-break-word font-mono text-base font-semibold tabular-nums max-[40rem]:text-xl xl:text-lg",
+                up ? "text-positive" : "text-negative",
+              )}
+            >
+              {fmtSigned(summary.pl)} ({fmtPct(summary.plPct)})
+            </span>
+          </CardContent>
+        </Card>
+      </section>
 
-        <section
-          className="row reveal"
-          style={{ "--i": 2 } as React.CSSProperties}
-        >
-          <PositionsTable
-            positions={pagePositions}
-            livePrices={livePriceMap}
-            onSelectSymbol={handleSelectSymbol}
-            page={page}
-            pageSize={PAGE_SIZE}
-            hasMore={hasMore}
-            onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
-            onNextPage={() => setPage((p) => p + 1)}
-          />
-        </section>
-      </main>
-
-      <footer className="statusbar">
-        <span>Paperline &mdash; paper trading sandbox</span>
-      </footer>
-    </>
+      <section
+        className="row reveal"
+        style={{ "--i": 2 } as React.CSSProperties}
+      >
+        <PositionsTable
+          positions={pagePositions}
+          livePrices={livePriceMap}
+          onSelectSymbol={handleSelectSymbol}
+          page={page}
+          pageSize={PAGE_SIZE}
+          hasMore={hasMore}
+          onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
+          onNextPage={() => setPage((p) => p + 1)}
+        />
+      </section>
+    </main>
   );
 }
