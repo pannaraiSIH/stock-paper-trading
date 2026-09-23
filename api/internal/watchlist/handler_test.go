@@ -35,6 +35,7 @@ type MockWatchlistService struct {
 	GetWatchlistItemsFunc func(
 		ctx context.Context,
 		watchlistID int64,
+		query GetWatchlistItemsQuery,
 	) ([]queries.WatchlistItem, error)
 
 	DeleteWatchlistItemFunc func(
@@ -68,8 +69,9 @@ func (m *MockWatchlistService) AddWatchlistItem(
 func (m *MockWatchlistService) GetWatchlistItems(
 	ctx context.Context,
 	watchlistID int64,
+	query GetWatchlistItemsQuery,
 ) ([]queries.WatchlistItem, error) {
-	return m.GetWatchlistItemsFunc(ctx, watchlistID)
+	return m.GetWatchlistItemsFunc(ctx, watchlistID, query)
 }
 
 func (m *MockWatchlistService) DeleteWatchlistItem(
@@ -402,7 +404,7 @@ func TestGetWatchlistItems(t *testing.T) {
 					}, nil
 				},
 
-				GetWatchlistItemsFunc: func(ctx context.Context, watchlistID int64) ([]queries.WatchlistItem, error) {
+				GetWatchlistItemsFunc: func(ctx context.Context, watchlistID int64, query GetWatchlistItemsQuery) ([]queries.WatchlistItem, error) {
 					return tt.items, tt.serviceErr
 				},
 			}

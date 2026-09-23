@@ -11,11 +11,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { TablePagination } from "@/components/dashboard/TablePagination";
 
 interface PositionsTableProps {
   positions: Position[];
   livePrices: Record<string, number>;
   onSelectSymbol?: (symbol: string) => void;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+  onPrevPage: () => void;
+  onNextPage: () => void;
 }
 
 const numHeadCls =
@@ -26,6 +32,11 @@ export const PositionsTable = memo(function PositionsTable({
   positions,
   livePrices,
   onSelectSymbol,
+  page,
+  pageSize,
+  hasMore,
+  onPrevPage,
+  onNextPage,
 }: PositionsTableProps) {
   return (
     <div className="panel panel--table min-w-0">
@@ -105,6 +116,14 @@ export const PositionsTable = memo(function PositionsTable({
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        page={page}
+        pageSize={pageSize}
+        itemCount={positions.length}
+        hasMore={hasMore}
+        onPrev={onPrevPage}
+        onNext={onNextPage}
+      />
     </div>
   );
 });

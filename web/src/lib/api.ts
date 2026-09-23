@@ -31,6 +31,13 @@ interface Envelope<T> {
   error?: string;
 }
 
+export const PAGE_SIZE = 20;
+
+export interface Page<T> {
+  items: T[];
+  hasMore: boolean;
+}
+
 async function request<T>(
   path: string,
   options: { method?: string; body?: unknown; auth?: boolean } = {},
@@ -78,6 +85,22 @@ async function request<T>(
   return (payload.data ?? (null as T)) as T;
 }
 
+// Requests one row beyond `limit` so `hasMore` can be derived without a
+// separate count query — the extra row is dropped before returning.
+async function requestPage<T>(
+  path: string,
+  limit: number,
+  offset: number,
+): Promise<Page<T>> {
+  const query = new URLSearchParams({
+    limit: String(limit + 1),
+    offset: String(offset),
+  });
+  const data = await request<T[] | null>(`${path}?${query}`);
+  const items = data ?? [];
+  return { items: items.slice(0, limit), hasMore: items.length > limit };
+}
+
 export const api = {
   register(email: string, password: string) {
     return request<User>("/auth/register", {
@@ -110,9 +133,17 @@ export const api = {
     return data ?? [];
   },
 
+  getPositionsPage(limit: number, offset: number) {
+    return requestPage<Position>("/positions", limit, offset);
+  },
+
   async getOrders() {
     const data = await request<Order[] | null>("/orders?limit=100&offset=0");
     return data ?? [];
+  },
+
+  getOrdersPage(limit: number, offset: number) {
+    return requestPage<Order>("/orders", limit, offset);
   },
 
   createOrder(symbol: string, side: OrderSide, quantity: number) {
@@ -131,8 +162,14 @@ export const api = {
   },
 
   async getWatchlistItems() {
-    const data = await request<WatchlistItem[] | null>("/watchlist/items");
+    const data = await request<WatchlistItem[] | null>(
+      "/watchlist/items?limit=100&offset=0",
+    );
     return data ?? [];
+  },
+
+  getWatchlistItemsPage(limit: number, offset: number) {
+    return requestPage<WatchlistItem>("/watchlist/items", limit, offset);
   },
 
   addWatchlistItem(symbol: string) {

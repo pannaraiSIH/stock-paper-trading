@@ -88,11 +88,19 @@ const getWatchlistItems = `-- name: GetWatchlistItems :many
 SELECT id, watchlist_id, symbol, created_at
 FROM watchlist_items 
 WHERE watchlist_id = $1
-ORDER BY created_at ASC
+ORDER BY created_at DESC
+LIMIT $3::int 
+OFFSET $2::int
 `
 
-func (q *Queries) GetWatchlistItems(ctx context.Context, watchlistID int64) ([]WatchlistItem, error) {
-	rows, err := q.db.Query(ctx, getWatchlistItems, watchlistID)
+type GetWatchlistItemsParams struct {
+	WatchlistID int64 `json:"watchlist_id"`
+	OffsetCount int32 `json:"offset_count"`
+	LimitCount  int32 `json:"limit_count"`
+}
+
+func (q *Queries) GetWatchlistItems(ctx context.Context, arg GetWatchlistItemsParams) ([]WatchlistItem, error) {
+	rows, err := q.db.Query(ctx, getWatchlistItems, arg.WatchlistID, arg.OffsetCount, arg.LimitCount)
 	if err != nil {
 		return nil, err
 	}

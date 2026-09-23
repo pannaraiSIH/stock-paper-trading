@@ -11,10 +11,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { TablePagination } from "@/components/dashboard/TablePagination";
 
 interface OrdersTableProps {
   orders: Order[];
-  limit?: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+  onPrevPage: () => void;
+  onNextPage: () => void;
 }
 
 const numHeadCls =
@@ -35,7 +40,11 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
 
 export const OrdersTable = memo(function OrdersTable({
   orders,
-  limit = 12,
+  page,
+  pageSize,
+  hasMore,
+  onPrevPage,
+  onNextPage,
 }: OrdersTableProps) {
   return (
     <div className="panel panel--table min-w-0">
@@ -62,7 +71,7 @@ export const OrdersTable = memo(function OrdersTable({
               </TableCell>
             </TableRow>
           ) : (
-            orders.slice(0, limit).map((order) => (
+            orders.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-mono">ORD-{order.id}</TableCell>
                 <TableCell className="font-mono">{order.symbol}</TableCell>
@@ -101,6 +110,14 @@ export const OrdersTable = memo(function OrdersTable({
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        page={page}
+        pageSize={pageSize}
+        itemCount={orders.length}
+        hasMore={hasMore}
+        onPrev={onPrevPage}
+        onNext={onNextPage}
+      />
     </div>
   );
 });

@@ -7,8 +7,9 @@ import (
 )
 
 type APIResponse[T any] struct {
-	Success bool `json:"success"`
-	Data    T    `json:"data"`
+	Success bool  `json:"success"`
+	Data    T     `json:"data"`
+	Total   int64 `json:"total"`
 }
 
 type ErrorResponse struct {
@@ -16,11 +17,17 @@ type ErrorResponse struct {
 	Error   string `json:"error"`
 }
 
-func Success[T any](c *gin.Context, statusCode int, data T) {
-	c.JSON(statusCode, APIResponse[T]{
+func Success[T any](c *gin.Context, statusCode int, data T, total ...int64) {
+	response := APIResponse[T]{
 		Success: true,
 		Data:    data,
-	})
+	}
+
+	if len(total) > 0 {
+		response.Total = total[0]
+	}
+
+	c.JSON(statusCode, response)
 }
 
 func Error(c *gin.Context, statusCode int, message string) {

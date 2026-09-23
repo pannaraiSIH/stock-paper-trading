@@ -28,7 +28,7 @@ type MockWatchlistRepository struct {
 
 	GetWatchlistItemsFunc func(
 		ctx context.Context,
-		watchlistID int64,
+		params queries.GetWatchlistItemsParams,
 	) ([]queries.WatchlistItem, error)
 
 	DeleteWatchlistItemFunc func(
@@ -60,9 +60,9 @@ func (m *MockWatchlistRepository) AddWatchlistItem(
 
 func (m *MockWatchlistRepository) GetWatchlistItems(
 	ctx context.Context,
-	watchlistID int64,
+	params queries.GetWatchlistItemsParams,
 ) ([]queries.WatchlistItem, error) {
-	return m.GetWatchlistItemsFunc(ctx, watchlistID)
+	return m.GetWatchlistItemsFunc(ctx, params)
 }
 
 func (m *MockWatchlistRepository) DeleteWatchlistItem(
@@ -230,22 +230,31 @@ func TestAddWatchlistItemService(t *testing.T) {
 	}
 }
 
-func TestGetWatchlistItemService(t *testing.T) {
+func TestGetWatchlistItemsService(t *testing.T) {
 	tests := []struct {
 		name        string
+		params      GetWatchlistItemsQuery
 		watchlistID int64
 		items       []queries.WatchlistItem
 		repoErr     error
 		expectedErr error
 	}{
 		{
-			name:        "repository error",
+			name: "repository error",
+			params: GetWatchlistItemsQuery{
+				Offset: 1,
+				Limit:  10,
+			},
 			watchlistID: 1,
 			repoErr:     errors.New("database error"),
 			expectedErr: errors.New("database error"),
 		},
 		{
-			name:        "success",
+			name: "success",
+			params: GetWatchlistItemsQuery{
+				Offset: 1,
+				Limit:  10,
+			},
 			watchlistID: 1,
 			items: []queries.WatchlistItem{
 				{
@@ -259,14 +268,14 @@ func TestGetWatchlistItemService(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &MockWatchlistRepository{
-				GetWatchlistItemsFunc: func(ctx context.Context, watchlistID int64) ([]queries.WatchlistItem, error) {
+				GetWatchlistItemsFunc: func(ctx context.Context, params queries.GetWatchlistItemsParams) ([]queries.WatchlistItem, error) {
 					return tt.items, tt.repoErr
 				},
 			}
 
 			service := NewWatchlistService(repo)
 
-			items, err := service.GetWatchlistItems(t.Context(), tt.watchlistID)
+			items, err := service.GetWatchlistItems(t.Context(), tt.watchlistID, tt.params)
 
 			if tt.expectedErr != nil {
 				assert.NotNil(t, err)

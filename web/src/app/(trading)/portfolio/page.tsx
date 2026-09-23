@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTradingStore } from "@/stores/tradingStore";
 import { useMarketStore } from "@/stores/marketStore";
-import { api } from "@/lib/api";
+import { api, PAGE_SIZE } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import { fmtPct, fmtSigned, fmtUSD } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,12 @@ export default function PortfolioPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
+  // Full set, used for the summary cards — independent of the table's page.
   const [positions, setPositions] = useState<Position[]>([]);
+  // Table-only slice.
+  const [pagePositions, setPagePositions] = useState<Position[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -35,6 +40,27 @@ export default function PortfolioPage() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const result = await api.getPositionsPage(PAGE_SIZE, page * PAGE_SIZE);
+        if (cancelled) return;
+        setPagePositions(result.items);
+        setHasMore(result.hasMore);
+      } catch (err) {
+        if (!cancelled) {
+          toast.error(errorMessage(err, "Failed to load your positions."));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
 
   const subscribedSymbols = useMemo(
     () => Array.from(new Set(positions.map((p) => p.symbol))).sort(),
@@ -136,9 +162,14 @@ export default function PortfolioPage() {
           style={{ "--i": 2 } as React.CSSProperties}
         >
           <PositionsTable
-            positions={positions}
+            positions={pagePositions}
             livePrices={livePriceMap}
             onSelectSymbol={handleSelectSymbol}
+            page={page}
+            pageSize={PAGE_SIZE}
+            hasMore={hasMore}
+            onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
+            onNextPage={() => setPage((p) => p + 1)}
           />
         </section>
       </main>

@@ -25,7 +25,7 @@ type WatchlistRepository interface {
 
 	GetWatchlistItems(
 		ctx context.Context,
-		watchlistID int64,
+		param queries.GetWatchlistItemsParams,
 	) ([]queries.WatchlistItem, error)
 
 	DeleteWatchlistItem(
@@ -67,9 +67,9 @@ func (r *watchlistRepository) AddWatchlistItem(
 
 func (r *watchlistRepository) GetWatchlistItems(
 	ctx context.Context,
-	watchlistID int64,
+	param queries.GetWatchlistItemsParams,
 ) ([]queries.WatchlistItem, error) {
-	return r.store.GetWatchlistItems(ctx, watchlistID)
+	return r.store.GetWatchlistItems(ctx, param)
 }
 
 func (r *watchlistRepository) DeleteWatchlistItem(

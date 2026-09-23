@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { api, PAGE_SIZE } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
 import type { Order } from "@/types";
 import { OrdersTable } from "@/components/dashboard/OrdersTable";
@@ -11,20 +11,31 @@ import { PageLoading } from "@/components/PageLoading";
 export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
-      setLoading(true);
       try {
-        const orderList = await api.getOrders();
-        setOrders(orderList);
+        const result = await api.getOrdersPage(PAGE_SIZE, page * PAGE_SIZE);
+        if (cancelled) return;
+        setOrders(result.items);
+        setHasMore(result.hasMore);
       } catch (err) {
-        toast.error(errorMessage(err, "Failed to load your orders."));
+        if (!cancelled) {
+          toast.error(errorMessage(err, "Failed to load your orders."));
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
 
   if (loading) {
     return <PageLoading label="orders" />;
@@ -46,7 +57,14 @@ export default function OrdersPage() {
           className="row reveal"
           style={{ "--i": 1 } as React.CSSProperties}
         >
-          <OrdersTable orders={orders} limit={100} />
+          <OrdersTable
+            orders={orders}
+            page={page}
+            pageSize={PAGE_SIZE}
+            hasMore={hasMore}
+            onPrevPage={() => setPage((p) => Math.max(0, p - 1))}
+            onNextPage={() => setPage((p) => p + 1)}
+          />
         </section>
       </main>
 

@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { TablePagination } from "@/components/dashboard/TablePagination";
 import { XIcon } from "../icons";
 
 export interface WatchlistRow {
@@ -25,6 +26,11 @@ interface WatchlistPanelProps {
   activeSymbol: string;
   onSelect: (symbol: string) => void;
   onRemove: (item: WatchlistItem) => void;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+  onPrevPage: () => void;
+  onNextPage: () => void;
 }
 
 const headCls =
@@ -38,6 +44,11 @@ export const WatchlistPanel = memo(function WatchlistPanel({
   activeSymbol,
   onSelect,
   onRemove,
+  page,
+  pageSize,
+  hasMore,
+  onPrevPage,
+  onNextPage,
 }: WatchlistPanelProps) {
   return (
     <div className="panel panel--table min-w-0">
@@ -126,6 +137,14 @@ export const WatchlistPanel = memo(function WatchlistPanel({
           )}
         </TableBody>
       </Table>
+      <TablePagination
+        page={page}
+        pageSize={pageSize}
+        itemCount={rows.length}
+        hasMore={hasMore}
+        onPrev={onPrevPage}
+        onNext={onNextPage}
+      />
     </div>
   );
 });

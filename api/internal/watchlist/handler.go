@@ -136,7 +136,14 @@ func (h *WatchlistHandler) GetWatchlistItems(ctx *gin.Context) {
 		return
 	}
 
-	watchlistItems, err := h.service.GetWatchlistItems(ctx, watchlistID)
+	var query GetWatchlistItemsQuery
+
+	if err := ctx.ShouldBindQuery(&query); err != nil {
+		response.BadRequest(ctx, "invalid query params")
+		return
+	}
+
+	watchlistItems, err := h.service.GetWatchlistItems(ctx, watchlistID, query)
 	if err != nil {
 		response.InternalServerError(ctx, "failed to get watchlist items")
 		return

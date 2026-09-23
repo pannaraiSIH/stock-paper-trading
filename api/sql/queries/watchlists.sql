@@ -23,7 +23,9 @@ RETURNING *;
 SELECT *
 FROM watchlist_items 
 WHERE watchlist_id = $1
-ORDER BY created_at ASC;
+ORDER BY created_at DESC
+LIMIT sqlc.arg(limit_count)::int 
+OFFSET sqlc.arg(offset_count)::int;
 
 -- name: DeleteWatchlistItem :exec
 DELETE FROM watchlist_items

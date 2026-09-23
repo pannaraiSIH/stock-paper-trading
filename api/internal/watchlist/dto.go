@@ -10,6 +10,11 @@ type AddWatchlistItemRequest struct {
 	Symbol string `json:"symbol" binding:"required"`
 }
 
+type GetWatchlistItemsQuery struct {
+	Offset int32 `form:"offset"`
+	Limit  int32 `form:"limit,default=20"`
+}
+
 type WatchlistItemResponse struct {
 	ID        int64     `json:"id"`
 	Symbol    string    `json:"symbol"`

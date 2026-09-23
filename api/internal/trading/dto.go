@@ -22,7 +22,7 @@ type GetOrdersQuery struct {
 	Status string `form:"status"`
 	Side   string `form:"side"`
 	Offset int32  `form:"offset"`
-	Limit  int32  `form:"limit"`
+	Limit  int32  `form:"limit,default=20"`
 }
 
 type OrderResponse struct {
@@ -37,7 +37,7 @@ type OrderResponse struct {
 type GetPositionsQuery struct {
 	Symbol string `form:"symbol"`
 	Offset int32  `form:"offset"`
-	Limit  int32  `form:"limit"`
+	Limit  int32  `form:"limit,default=20"`
 }
 
 type PositionResponse struct {
