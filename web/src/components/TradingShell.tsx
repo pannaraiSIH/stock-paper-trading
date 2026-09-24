@@ -10,7 +10,12 @@ import { useMarketSocket } from "@/hooks/useMarketSocket";
 import { useMarketStore } from "@/stores/marketStore";
 import { errorMessage } from "@/lib/errors";
 import { PageLoading } from "./PageLoading";
-import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/ui/alert";
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertAction,
+} from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 export function TradingShell({ children }: { children: React.ReactNode }) {
@@ -65,22 +70,24 @@ export function TradingShell({ children }: { children: React.ReactNode }) {
         />
 
         {status === "error" ? (
-          <Alert variant="destructive" className="m-6">
-            <AlertTitle>Couldn&apos;t load your account</AlertTitle>
-            <AlertDescription>
-              {errorMessage(error, "Failed to load your account.")}
-            </AlertDescription>
-            <AlertAction>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => void initialize()}
-              >
-                Retry
-              </Button>
-            </AlertAction>
-          </Alert>
+          <div className="p-6">
+            <Alert variant="destructive">
+              <AlertTitle>Couldn&apos;t load your account</AlertTitle>
+              <AlertDescription>
+                {errorMessage(error, "Failed to load your account.")}
+              </AlertDescription>
+              <AlertAction>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void initialize()}
+                >
+                  Retry
+                </Button>
+              </AlertAction>
+            </Alert>
+          </div>
         ) : status !== "ready" ? (
           <PageLoading label="account" />
         ) : (
