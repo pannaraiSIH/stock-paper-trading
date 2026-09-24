@@ -19,6 +19,10 @@ func NewHealthHandler(store *db.Store) *HealthHandler {
 }
 
 func (h *HealthHandler) Health(c *gin.Context) {
+	response.Success(c, http.StatusOK, gin.H{"status": "ok"})
+}
+
+func (h *HealthHandler) Ready(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	if err := h.store.Ping(ctx); err != nil {

@@ -23,6 +23,7 @@ func SetupRouter(
 	api := r.Group("/api")
 
 	api.GET("/health", healthHandler.Health)
+	api.GET("/ready", healthHandler.Ready)
 
 	api.POST("/auth/register", authHandler.CreateUser)
 	api.POST("/auth/login", authHandler.Login)
