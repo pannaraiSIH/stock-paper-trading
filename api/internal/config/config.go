@@ -13,7 +13,6 @@ type Config struct {
 	Port             string
 	TwelveDataApiKey string
 	RedisURL         string
-	RedisPassword    string
 }
 
 func Load() Config {
@@ -27,6 +26,5 @@ func Load() Config {
 		Port:             os.Getenv("PORT"),
 		TwelveDataApiKey: os.Getenv("TWELVEDATA_API_KEY"),
 		RedisURL:         os.Getenv("REDIS_URL"),
-		RedisPassword:    os.Getenv("REDIS_PASSWORD"),
 	}
 }

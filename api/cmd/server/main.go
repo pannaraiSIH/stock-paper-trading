@@ -33,7 +33,7 @@ func main() {
 	}
 	defer store.Close()
 
-	rdb, err := redis.NewRedisClient(context.Background(), cfg.RedisURL, cfg.RedisPassword)
+	rdb, err := redis.NewRedisClient(context.Background(), cfg.RedisURL)
 	if err != nil {
 		log.Fatalf("failed to connect Redis: %v", err)
 	}
